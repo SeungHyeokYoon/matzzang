@@ -1,6 +1,7 @@
 package com.matzzangteam.matzzang.controller;
 
-import com.matzzangteam.matzzang.dto.JoinRequest;
+import com.matzzangteam.matzzang.dto.user.JoinRequest;
+import com.matzzangteam.matzzang.dto.user.JoinResponse;
 import com.matzzangteam.matzzang.entity.User;
 import com.matzzangteam.matzzang.service.UserService;
 import jakarta.validation.Valid;
@@ -20,6 +21,13 @@ public class UserController {
     @PostMapping
     public ResponseEntity<?> join(@RequestBody @Valid JoinRequest request) {
         User user = userService.register(request);
-        return ResponseEntity.ok("success");
+        return ResponseEntity.ok().body(
+                new JoinResponse(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getNickname(),
+                        user.getInviteCode()
+                )
+        );
     }
 }
