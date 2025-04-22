@@ -19,7 +19,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<?> join(@RequestBody @Valid JoinRequest request) {
+    public ResponseEntity<JoinResponse> join(@RequestBody @Valid JoinRequest request) {
         User user = userService.register(request);
         return ResponseEntity.ok().body(
                 new JoinResponse(
