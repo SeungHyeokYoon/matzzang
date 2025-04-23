@@ -2,6 +2,7 @@ package com.matzzangteam.matzzang.service;
 
 import com.matzzangteam.matzzang.dto.user.JoinRequest;
 import com.matzzangteam.matzzang.dto.user.LoginRequest;
+import com.matzzangteam.matzzang.dto.user.MyInfoResponse;
 import com.matzzangteam.matzzang.entity.User;
 import com.matzzangteam.matzzang.exception.ClientErrorException;
 import com.matzzangteam.matzzang.repository.UserRepository;
@@ -77,5 +78,18 @@ public class UserService implements UserDetailsService {
         }
 
         return user;
+    }
+
+    public MyInfoResponse getMyInfo(User user) {
+        return new MyInfoResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getNickname(),
+                user.getInviteCode(),
+                user.getProfileImageUrl(),
+                5,   // TODO: 실제 challenge 수
+                12,  // TODO: 실제 방문 맛집 수
+                3    // TODO: 실제 친구 수
+        );
     }
 }
