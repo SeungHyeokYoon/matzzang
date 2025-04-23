@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -39,6 +40,7 @@ public class RefreshTokenService {
         );
     }
 
+    @Transactional
     public TokenResponse loginAndGenerateTokens(LoginRequest request) {
         User user = userService.login(request);
 
@@ -50,6 +52,7 @@ public class RefreshTokenService {
         return new TokenResponse(accessToken, refreshToken);
     }
 
+    @Transactional
     public TokenResponse reissueTokens(RefreshRequest request) {
         RefreshToken savedToken = refreshTokenRepository.findByUserId(request.userId())
                 .orElseThrow(() -> new ClientErrorException(HttpStatus.UNAUTHORIZED, "No Refresh Token"));
