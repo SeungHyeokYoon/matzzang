@@ -42,7 +42,7 @@ public class FriendshipController {
     }
 
     @GetMapping
-    public List<FriendListResponse> getFriendList(@AuthenticationPrincipal User user) {
-        return friendshipService.getFriends(user);
+    public ResponseEntity<List<FriendListResponse>> getFriendList(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(friendshipService.getFriends(user));
     }
 }
