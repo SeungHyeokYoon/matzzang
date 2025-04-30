@@ -5,6 +5,8 @@ import com.matzzangteam.matzzang.dto.user.LoginRequest;
 import com.matzzangteam.matzzang.dto.user.MyInfoResponse;
 import com.matzzangteam.matzzang.entity.User;
 import com.matzzangteam.matzzang.exception.ClientErrorException;
+import com.matzzangteam.matzzang.repository.ChallengeMemberRepository;
+import com.matzzangteam.matzzang.repository.StampRepository;
 import com.matzzangteam.matzzang.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,8 +24,10 @@ import java.util.UUID;
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
-
+    private final ChallengeMemberRepository challengeMemberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final FriendshipService friendshipService;
+    private final StampRepository stampRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -83,15 +87,21 @@ public class UserService implements UserDetailsService {
     }
 
     public MyInfoResponse getMyInfo(User user) {
+
+        int challengeCount = challengeMemberRepository.countByUser(user);
+        int friendCount = friendshipService.getFriends(user).size();
+        int visitedRestaurantCount = stampRepository.countVisitedRestaurantsByUser(user);
+
+
         return new MyInfoResponse(
                 user.getId(),
                 user.getEmail(),
                 user.getNickname(),
                 user.getInviteCode(),
                 user.getProfileImageUrl(),
-                5,   // TODO: 실제 challenge 수
-                12,  // TODO: 실제 방문 맛집 수
-                3    // TODO: 실제 친구 수
+                challengeCount,
+                visitedRestaurantCount,
+                friendCount
         );
     }
 }

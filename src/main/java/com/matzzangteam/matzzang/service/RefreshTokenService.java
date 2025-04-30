@@ -11,6 +11,7 @@ import com.matzzangteam.matzzang.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserService userService;
     private final JwtProvider jwtProvider;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Value("${jwt.refresh-token-expiration}")
     private long refreshTokenExpiration;
@@ -34,7 +36,7 @@ public class RefreshTokenService {
         refreshTokenRepository.save(
                 RefreshToken.builder()
                         .userId(userId)
-                        .token(token)
+                        .token(passwordEncoder.encode(token))
                         .expiration(expirationTime)
                         .build()
         );
@@ -57,9 +59,13 @@ public class RefreshTokenService {
         RefreshToken savedToken = refreshTokenRepository.findByUserId(request.userId())
                 .orElseThrow(() -> new ClientErrorException(HttpStatus.UNAUTHORIZED, "No Refresh Token"));
 
-        if (!savedToken.getToken().equals(request.refreshToken())) {
+        if (!passwordEncoder.matches(request.refreshToken(), savedToken.getToken())) {
             throw new ClientErrorException(HttpStatus.UNAUTHORIZED, "Refresh Token not Match");
         }
+
+//        if (!savedToken.getToken().equals(request.refreshToken())) {
+//            throw new ClientErrorException(HttpStatus.UNAUTHORIZED, "Refresh Token not Match");
+//        }
 
         if (savedToken.getExpiration().isBefore(LocalDateTime.now())) {
             refreshTokenRepository.deleteByUserId(request.userId());

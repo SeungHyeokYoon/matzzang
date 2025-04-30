@@ -1,15 +1,18 @@
 package com.matzzangteam.matzzang.controller;
 
+import com.matzzangteam.matzzang.dto.restaurant.RestaurantDetailResponse;
 import com.matzzangteam.matzzang.dto.restaurant.RestaurantRegisterRequest;
 import com.matzzangteam.matzzang.dto.restaurant.RestaurantSearchRequest;
 import com.matzzangteam.matzzang.dto.restaurant.RestaurantSearchResponse;
 import com.matzzangteam.matzzang.entity.Restaurant;
+import com.matzzangteam.matzzang.entity.User;
 import com.matzzangteam.matzzang.service.RestaurantService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,5 +38,11 @@ public class RestaurantController {
                 .map(RestaurantSearchResponse::from)
                 .toList()
         );
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<RestaurantDetailResponse> getRestaurantDetail(@AuthenticationPrincipal User user, @PathVariable Long id) {
+        RestaurantDetailResponse response = restaurantService.getRestaurantDetail(user, id);
+        return ResponseEntity.ok(response);
     }
 }

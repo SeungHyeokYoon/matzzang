@@ -29,7 +29,7 @@ public class UserControllerTest {
     void join_success() throws Exception {
         // given
         JoinRequest request = new JoinRequest(
-                "test" + System.currentTimeMillis() + "@example.com", // 이메일 중복 방지
+                "test" + System.currentTimeMillis() + "@example.com",
                 "맛집러",
                 "1234",
                 "1234"

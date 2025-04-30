@@ -30,7 +30,7 @@ public class FriendshipService {
             throw new ClientErrorException(HttpStatus.BAD_REQUEST, "Cannot send friend request to yourself");
         }
 
-        boolean exists = friendshipRepository.existsByFromUserAndToUser(fromUser, toUser);
+        boolean exists = friendshipRepository.findFriendshipBetweenUsers(fromUser, toUser).isPresent();
         if (exists) {
             throw new ClientErrorException(HttpStatus.BAD_REQUEST, "Request already sent");
         }
@@ -73,7 +73,7 @@ public class FriendshipService {
 
         return friendships.stream()
                 .map(friendship -> {
-                    User friend = friendship.getFromUser().equals(user)
+                    User friend = friendship.getFromUser().getId().equals(user.getId())
                             ? friendship.getToUser()
                             : friendship.getFromUser();
                     return new FriendListResponse(
