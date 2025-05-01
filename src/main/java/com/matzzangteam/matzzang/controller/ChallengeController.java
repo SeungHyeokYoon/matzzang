@@ -20,14 +20,15 @@ public class ChallengeController {
 
     @PostMapping
     public ResponseEntity<Void> registerChallenge(@AuthenticationPrincipal User user,
-                                                  @RequestBody ChallengeRegisterRequest request) {
+                                                  @RequestBody @Valid ChallengeRegisterRequest request) {
         challengeService.registerChallenge(user, request);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/stamp")
-    public ResponseEntity<Void> updateStamp(@RequestBody @Valid StampUpdateRequest request) {
-        challengeService.updateStamp(request);
+    public ResponseEntity<Void> updateStamp(@AuthenticationPrincipal User user,
+                                            @RequestBody @Valid StampUpdateRequest request) {
+        challengeService.updateStamp(user, request);
         return ResponseEntity.ok().build();
     }
 
@@ -56,6 +57,13 @@ public class ChallengeController {
     public ResponseEntity<Void> deleteStamp(@AuthenticationPrincipal User user,
                                             @PathVariable Long id) {
         challengeService.deleteStamp(user, id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{challengeId}")
+    public ResponseEntity<Void> deleteChallenge(@AuthenticationPrincipal User user,
+                                                @PathVariable Long challengeId) {
+        challengeService.deleteChallenge(user, challengeId);
         return ResponseEntity.ok().build();
     }
 }

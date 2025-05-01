@@ -31,7 +31,14 @@ public class RestaurantController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<RestaurantSearchResponse>> searchRestaurants(@RequestBody RestaurantSearchRequest request) {
+    public ResponseEntity<List<RestaurantSearchResponse>> searchRestaurants(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Restaurant.RestaurantCategory category,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size
+    ) {
+
+        RestaurantSearchRequest request = new RestaurantSearchRequest(name, category, page, size);
         Page<Restaurant> restaurants = restaurantService.searchRestaurants(request);
 
         return ResponseEntity.ok(restaurants.stream()

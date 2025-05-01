@@ -73,11 +73,14 @@ public class ChallengeService {
     }
 
     @Transactional
-    public void updateStamp(StampUpdateRequest request) {
+    public void updateStamp(User user, StampUpdateRequest request) {
         Stamp stamp = stampRepository.findById(request.stampId())
                 .orElseThrow(() -> new ClientErrorException(HttpStatus.NOT_FOUND, "Stamp not found"));
 
-        //add: verify user that really has auth to fix
+        boolean isMember = challengeMemberRepository.existsByChallengeAndUser(stamp.getChallenge(), user);
+        if (!isMember) {
+            throw new ClientErrorException(HttpStatus.FORBIDDEN, "No permission to update this stamp");
+        }
 
         if (request.visitedAt() != null) {
             stamp.setVisitedAt(request.visitedAt());

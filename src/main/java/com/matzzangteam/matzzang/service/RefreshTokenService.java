@@ -15,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
 
 @Service
@@ -36,7 +37,7 @@ public class RefreshTokenService {
         refreshTokenRepository.save(
                 RefreshToken.builder()
                         .userId(userId)
-                        .token(passwordEncoder.encode(token))
+                        .token(token)
                         .expiration(expirationTime)
                         .build()
         );
@@ -51,7 +52,7 @@ public class RefreshTokenService {
 
         save(user.getId(), refreshToken, refreshTokenExpiration);
 
-        return new TokenResponse(accessToken, refreshToken);
+        return new TokenResponse(user.getId(), accessToken, refreshToken);
     }
 
     @Transactional
@@ -59,13 +60,13 @@ public class RefreshTokenService {
         RefreshToken savedToken = refreshTokenRepository.findByUserId(request.userId())
                 .orElseThrow(() -> new ClientErrorException(HttpStatus.UNAUTHORIZED, "No Refresh Token"));
 
-        if (!passwordEncoder.matches(request.refreshToken(), savedToken.getToken())) {
-            throw new ClientErrorException(HttpStatus.UNAUTHORIZED, "Refresh Token not Match");
-        }
-
-//        if (!savedToken.getToken().equals(request.refreshToken())) {
+//        if (!passwordEncoder.matches(request.refreshToken(), savedToken.getToken())) {
 //            throw new ClientErrorException(HttpStatus.UNAUTHORIZED, "Refresh Token not Match");
 //        }
+
+        if (!savedToken.getToken().equals(request.refreshToken())) {
+            throw new ClientErrorException(HttpStatus.UNAUTHORIZED, "Refresh Token not Match");
+        }
 
         if (savedToken.getExpiration().isBefore(LocalDateTime.now())) {
             refreshTokenRepository.deleteByUserId(request.userId());
@@ -78,7 +79,7 @@ public class RefreshTokenService {
 
         save(request.userId(), newRefreshToken, refreshTokenExpiration);
 
-        return new TokenResponse(newAccessToken, newRefreshToken);
+        return new TokenResponse(request.userId(), newAccessToken, newRefreshToken);
     }
 
 }

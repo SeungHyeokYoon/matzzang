@@ -1,9 +1,9 @@
 package com.matzzangteam.matzzang.dto.friendship;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public record FriendAcceptRequest(
-        @NotNull(message = "userId는 필수입니다.")
+        @NotBlank(message = "userId is necessary")
         Long userId
 ) {
 }

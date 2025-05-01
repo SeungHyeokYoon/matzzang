@@ -1,5 +1,6 @@
 package com.matzzangteam.matzzang.jwt;
 
+import com.matzzangteam.matzzang.exception.ClientErrorException;
 import com.matzzangteam.matzzang.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -7,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +24,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
     private final UserService userService;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
 
     @Override
@@ -30,28 +33,40 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        final String BEARER_PREFIX = "Bearer ";
-        final String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+        try {
+            final String BEARER_PREFIX = "Bearer ";
+            final String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if (!ObjectUtils.isEmpty(authorization) &&
-                authorization.startsWith(BEARER_PREFIX) &&
-                SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (!ObjectUtils.isEmpty(authorization) &&
+                    authorization.startsWith(BEARER_PREFIX) &&
+                    SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            final String token = authorization.substring(BEARER_PREFIX.length());
+                final String token = authorization.substring(BEARER_PREFIX.length());
 
-            if (jwtProvider.validateToken(token)) {
-                String email = jwtProvider.getEmailFromToken(token);
-                UserDetails userDetails = userService.loadUserByUsername(email);
+                if (jwtProvider.validateToken(token)) {
+                    String email = jwtProvider.getEmailFromToken(token);
+                    UserDetails userDetails = userService.loadUserByUsername(email);
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails, null, userDetails.getAuthorities());
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+
             }
 
+            filterChain.doFilter(request, response);
+
+        } catch (ClientErrorException ex) {
+            request.setAttribute("exceptionMessage", ex.getMessage());
+            jwtAuthenticationEntryPoint.commence(
+                    request,
+                    response,
+                    new BadCredentialsException(ex.getMessage(), ex)
+            );
         }
 
-        filterChain.doFilter(request, response);
+
     }
 }

@@ -7,10 +7,11 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 public record StampUpdateRequest(
+        @NotNull
         Long stampId,
         LocalDateTime visitedAt,
         String memo,
-        @NotNull(message = "평점은 필수입니다.")
+        @NotNull(message = "Rate is necessary")
         @Min(1) @Max(5)
         Integer rate,
         String imageUrl

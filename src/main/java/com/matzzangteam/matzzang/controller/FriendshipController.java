@@ -23,7 +23,7 @@ public class FriendshipController {
     @PostMapping("/request")
     public ResponseEntity<Void> sendFriendRequest(
             @AuthenticationPrincipal User user,
-            @RequestBody FriendRequest request
+            @RequestBody @Valid FriendRequest request
     ) {
         friendshipService.sendFriendRequest(user, request);
         return ResponseEntity.ok().build();

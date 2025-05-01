@@ -11,8 +11,6 @@ import java.util.Optional;
 
 public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
 
-    boolean existsByFromUserAndToUser(User fromUser, User toUser);
-
     @Query("""
                 SELECT f FROM Friendship f
                 WHERE 
