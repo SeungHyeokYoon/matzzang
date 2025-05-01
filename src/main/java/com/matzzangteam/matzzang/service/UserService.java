@@ -3,6 +3,7 @@ package com.matzzangteam.matzzang.service;
 import com.matzzangteam.matzzang.dto.user.JoinRequest;
 import com.matzzangteam.matzzang.dto.user.LoginRequest;
 import com.matzzangteam.matzzang.dto.user.MyInfoResponse;
+import com.matzzangteam.matzzang.dto.user.UpdateUserRequest;
 import com.matzzangteam.matzzang.entity.User;
 import com.matzzangteam.matzzang.exception.ClientErrorException;
 import com.matzzangteam.matzzang.repository.ChallengeMemberRepository;
@@ -87,6 +88,37 @@ public class UserService implements UserDetailsService {
     }
 
     public MyInfoResponse getMyInfo(User user) {
+
+        int challengeCount = challengeMemberRepository.countByUser(user);
+        int friendCount = friendshipService.getFriends(user).size();
+        int visitedRestaurantCount = stampRepository.countVisitedRestaurantsByUser(user);
+
+
+        return new MyInfoResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getNickname(),
+                user.getInviteCode(),
+                user.getProfileImageUrl(),
+                challengeCount,
+                visitedRestaurantCount,
+                friendCount
+        );
+    }
+
+    @Transactional
+    public MyInfoResponse updateUserInfo(User userParam, UpdateUserRequest request) {
+
+        User user = userRepository.findById(userParam.getId())
+                .orElseThrow(() -> new ClientErrorException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (request.nickname() != null && !request.nickname().isBlank()) {
+            user.setNickname(request.nickname());
+        }
+
+        if (request.profileImageUrl() != null && !request.profileImageUrl().isBlank()) {
+            user.setProfileImageUrl(request.profileImageUrl());
+        }
 
         int challengeCount = challengeMemberRepository.countByUser(user);
         int friendCount = friendshipService.getFriends(user).size();

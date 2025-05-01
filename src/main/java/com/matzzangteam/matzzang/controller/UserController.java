@@ -3,6 +3,7 @@ package com.matzzangteam.matzzang.controller;
 import com.matzzangteam.matzzang.dto.user.JoinRequest;
 import com.matzzangteam.matzzang.dto.user.JoinResponse;
 import com.matzzangteam.matzzang.dto.user.MyInfoResponse;
+import com.matzzangteam.matzzang.dto.user.UpdateUserRequest;
 import com.matzzangteam.matzzang.entity.User;
 import com.matzzangteam.matzzang.service.UserService;
 import jakarta.validation.Valid;
@@ -33,5 +34,11 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<MyInfoResponse> getMyInfo(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(userService.getMyInfo(user));
+    }
+
+    @PatchMapping("/me")
+    public ResponseEntity<MyInfoResponse> updateMyInfo(@AuthenticationPrincipal User user,
+                                                       @RequestBody UpdateUserRequest request) {
+        return ResponseEntity.ok(userService.updateUserInfo(user, request));
     }
 }
